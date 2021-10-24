@@ -18,13 +18,22 @@ const storeConfig = {
     loading: false,
     weaponTypes: [{
       name: 'Sword',
-      index: 0
+      index: 0,
+      imageUri: 'https://bafkreih2u25boco57kn4ydqnlfl7hyb3j4f3er7rnyuutrxxmlfyye5qum.ipfs.dweb.link/',
+      minDmg: 80,
+      maxDmg: 80+40
     },{
       name: 'Axe',
       index: 1,
+      imageUri: 'https://bafkreibs6hpzzrtsqwj73ja6c5uc3ppewqwxwznze4auo3ypgibhbv6cii.ipfs.dweb.link/',
+      minDmg: 50,
+      maxDmg: 50+70
     }, {
       name: 'Bow',
-      index: 2
+      index: 2,
+      imageUri: 'https://bafkreiclfah454anm7fcslfpzlurxdnujsrc6grzk7uqhio7nebar4m3ca.ipfs.dweb.link',
+      minDmg: 30,
+      maxDmg: 30+80
     }], // hardcoded from contract uin8 ItemType
     boss: null,
     attackState: ''
@@ -133,7 +142,8 @@ const storeConfig = {
 
       const txn = await gameContract.checkIfUserHasNFT();
       if (txn.name) {
-        context.commit('SELECT_CHARACTER', transformCharacterData(txn));
+        const character = transformCharacterData(txn);
+        context.commit('SELECT_CHARACTER', character);
       } else {
         console.warn('No selected character');
       }
@@ -201,12 +211,17 @@ const storeConfig = {
     async attackBoss(context) {
       try{
         console.log('Attacking boss...');
-        context.commit('SET_ATTACKING', 'attacking');
         const gameContract = await context.dispatch('fetchGameContract');
         const attackTxn = await gameContract.attackBoss();
+        context.commit('SET_ATTACKING', 'playerAttacking');
+        await new Promise((resolve)=> { setTimeout( resolve, 750 )});
         await attackTxn.wait();
         console.log('attackTxn:', attackTxn);
-        context.commit('SET_ATTACKING', 'hit');
+        context.commit('SET_ATTACKING', 'playerHit');
+        await new Promise((resolve)=> { setTimeout( resolve, 1500 )});
+        context.commit('SET_ATTACKING', 'bossAttacking');
+        await new Promise((resolve)=> { setTimeout( resolve, 750 )});
+        context.commit('SET_ATTACKING', 'bossHit');
       } catch (error) {
         console.error(error);
         context.commit('SET_ATTACKING', '');

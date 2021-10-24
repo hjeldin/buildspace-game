@@ -21,6 +21,7 @@ contract LootNFT is ERC721URIStorage {
     struct ItemAttributes {
         string name;
         string description;
+        string imageUri;
         ItemType itemType;
         uint256 dmg;
         uint256 level;
@@ -47,17 +48,43 @@ contract LootNFT is ERC721URIStorage {
 
         uint256 newItemId = _tokenIds.current();
 
-        uint256 dmg = random(
-            (
-                string(
-                    abi.encodePacked(block.timestamp, Strings.toString(newItemId))
+        string memory image = '';
+        uint8 dmg = 0;
+        if(itemType == ItemType.SWORD) {
+            image = 'https://bafkreih2u25boco57kn4ydqnlfl7hyb3j4f3er7rnyuutrxxmlfyye5qum.ipfs.dweb.link/';
+            dmg = uint8(random(
+                (
+                    string(
+                        abi.encodePacked(block.timestamp, Strings.toString(newItemId))
+                    )
                 )
-            )
-        ) % 100 + 50;
+            )) % 40 + 80;
+        }
+        if(itemType == ItemType.AXE) {
+            image = 'https://bafkreibs6hpzzrtsqwj73ja6c5uc3ppewqwxwznze4auo3ypgibhbv6cii.ipfs.dweb.link/';
+            dmg = uint8(random(
+                (
+                    string(
+                        abi.encodePacked(block.timestamp, Strings.toString(newItemId))
+                    )
+                )
+            )) % 70 + 50;
+        }
+        if(itemType == ItemType.BOW) {
+            image = 'https://bafkreiclfah454anm7fcslfpzlurxdnujsrc6grzk7uqhio7nebar4m3ca.ipfs.dweb.link';
+            dmg = uint8(random(
+                (
+                    string(
+                        abi.encodePacked(block.timestamp, Strings.toString(newItemId))
+                    )
+                )
+            )) % 80 + 30;
+        }
 
         itemAttributes[newItemId] = ItemAttributes({
             name: itemName,
             description: itemDescription,
+            imageUri: image,
             itemType: itemType,
             dmg: dmg,
             level: 1
@@ -112,7 +139,9 @@ contract LootNFT is ERC721URIStorage {
                         attribs.name,
                         '", "description": "',
                         attribs.description,
-                        '", "image": "",',
+                        '", "image": "',
+                        attribs.imageUri,
+                        '",',
                         '"attributes": [{',
                         '"trait_type": "Damage",',
                         '"value": ', 

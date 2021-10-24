@@ -8,10 +8,13 @@
         v-for="weapon of availableWeapons"
         v-bind:key="weapon.id"
       >
+        <div class="relative">
+          <img class="w-full" :src="weapon.imageUri" alt="Weapon portrait" />
+          <span class="absolute bottom-0 left-0 right-0 bg-gray-900 opacity-70 px-4 py-2 shadow-lg">⚔️ Min {{weapon.damage}}</span>
+        </div>
         <div class="px-6 py-4">
           <div class="font-bold text-xl mb-2">{{ weapon.name }}</div>
           <div class="mb-2">{{ weapon.description }}</div>
-          <div class="mb-2">⚔️: {{weapon.damage}}</div>
         </div>
         <div class="px-6 pt-4 pb-2">
           <div class="relative group">
@@ -28,12 +31,18 @@
       </div>
     </div>
 
+    <div class="my-8">Or mint a new one</div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-row-auto mx-auto text-center gap-24 justify-items-center" v-if="!loading">
       <div
         class="max-w-sm border border-gray-500 bg-gray-600 overflow-hidden shadow-2xl p-4 transition duration-200 ease-in-out transform hover:scale-110"
         v-for="weapon of weaponTypes"
         v-bind:key="weapon.index"
       >
+        <div class="relative">
+          <img class="w-full" :src="weapon.imageUri" alt="Weapon portrait" />
+          <span class="absolute bottom-0 left-0 right-0 bg-gray-900 opacity-70 px-4 py-2 shadow-lg">⚔️ Min {{weapon.minDmg}} - Max {{weapon.maxDmg}}</span>
+        </div>
         <div class="px-6 py-4">
           <div class="font-bold text-xl mb-2">{{ weapon.name }}</div>
         </div>

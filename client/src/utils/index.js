@@ -34,10 +34,12 @@ export const transformBossData = (bossData) => {
 }
 
 export const transformWeaponData = (weaponData) => {
+  console.log(weaponData.attribs);
   return {
     id: weaponData.tokenId.toNumber(),
     name: weaponData.attribs.name,
     description: weaponData.attribs.description,
+    imageUri: weaponData.attribs.imageUri,
     damage: weaponData.attribs.dmg.toNumber(),
     level: weaponData.attribs.level.toNumber()
   }

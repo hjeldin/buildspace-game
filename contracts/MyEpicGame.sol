@@ -199,6 +199,7 @@ contract MyEpicGame is ERC721 {
         (
             string memory itemName,
             string memory itemDescr,
+            string memory itemImageUri,
             LootNFT.ItemType itemType,
             uint256 itemDmg,
             uint256 itemLevel
@@ -244,6 +245,7 @@ contract MyEpicGame is ERC721 {
         (
             string memory itemName,
             string memory itemDescr,
+            string memory itemImageUri,
             LootNFT.ItemType itemType,
             uint256 itemDmg,
             uint256 itemLevel
