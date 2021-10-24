@@ -1,0 +1,11 @@
+{
+  "name": "Bow",
+  "description": "A generic bow",
+  "image": "https://opengameart.org/sites/default/files/styles/medium/public/Bow.PNG",
+  "attributes": [
+    {
+      "trait_type": "",
+      "value": ""
+    }
+  ]
+}

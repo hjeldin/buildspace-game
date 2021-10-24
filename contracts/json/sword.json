@@ -1,0 +1,11 @@
+{
+  "name": "Sword",
+  "description": "A generic sword",
+  "image": "https://opengameart.org/sites/default/files/styles/medium/public/sword_render.png",
+  "attributes": [
+    {
+      "trait_type": "",
+      "value": ""
+    }
+  ]
+}
