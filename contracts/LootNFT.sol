@@ -26,7 +26,15 @@ contract LootNFT is ERC721URIStorage {
         uint256 level;
     }
 
+    struct TokenAndItemAttributes {
+        uint256 tokenId;
+        ItemAttributes attribs;
+    }
+
     mapping(uint256 => ItemAttributes) public itemAttributes;
+    mapping(address => uint256[]) public ownedWeapons;
+
+    event WeaponMinted(uint256 id);
 
     constructor() ERC721("LootNFT", "LooT") {
     }
@@ -56,7 +64,22 @@ contract LootNFT is ERC721URIStorage {
         });
 
         _mint(msg.sender, newItemId);
+        ownedWeapons[msg.sender].push(newItemId);
+        emit WeaponMinted(newItemId);
         return newItemId;
+    }
+
+    function getAvailableItems() public view returns (TokenAndItemAttributes[] memory) {
+        TokenAndItemAttributes[] memory tokenArray = new TokenAndItemAttributes[](ownedWeapons[msg.sender].length);
+        
+        for(uint i = 0; i < ownedWeapons[msg.sender].length; i++) {
+            tokenArray[i] = TokenAndItemAttributes({
+                tokenId: ownedWeapons[msg.sender][i],
+                attribs: itemAttributes[ownedWeapons[msg.sender][i]]
+            });
+        }
+
+        return tokenArray;
     }
 
     function tokenURI(uint256 _tokenId)

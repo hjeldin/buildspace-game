@@ -45,6 +45,7 @@ contract MyEpicGame is ERC721 {
 
     event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
     event AttackComplete(uint newBossHp, uint newPlayerHp);
+    event WeaponEquipped(uint256 equippedWeapon);
 
     constructor(
         address lootContractAddress,
@@ -123,6 +124,42 @@ contract MyEpicGame is ERC721 {
         _tokenIds.increment();
 
         emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
+    }
+
+    function mintCharacterWithoutWeapon(uint256 _characterIndex)
+        external
+    {
+        uint256 newItemId = _tokenIds.current();
+
+        _safeMint(msg.sender, newItemId);
+
+        CharacterAttributes memory defaultCharacter = defaultCharacters[
+            _characterIndex
+        ];
+        nftHolderAttributes[newItemId] = CharacterAttributes({
+            characterIndex: _characterIndex,
+            name: defaultCharacter.name,
+            imageURI: defaultCharacter.imageURI,
+            hp: defaultCharacter.hp,
+            maxHp: defaultCharacter.maxHp,
+            equippedWeapon: 0
+        });
+
+        console.log("Minted character for %s: %d", msg.sender, newItemId);
+
+        nftHolders[msg.sender] = newItemId;
+
+        _tokenIds.increment();
+
+        emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
+    }
+
+    function equipWeapon(uint256 weaponTokenId) public {
+        require(msg.sender == lootContract.ownerOf(weaponTokenId));
+        uint256 token = nftHolders[msg.sender];
+        CharacterAttributes storage player = nftHolderAttributes[token];
+        player.equippedWeapon = weaponTokenId;
+        emit WeaponEquipped(weaponTokenId);
     }
 
     function getMyHP() public view returns (uint) {

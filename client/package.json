@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "copy-abis": "cp ../artifacts/contracts/MyEpicGame.sol/MyEpicGame.json ./src/utils/HeroesABI.json && cp ../artifacts/contracts/LootNFT.sol/LootNFT.json ./src/utils/LootABI.json",
+    "serve": "yarn copy-abis && vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
