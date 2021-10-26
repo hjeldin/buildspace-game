@@ -13,6 +13,7 @@ export const getEthereum = () => {
 
 
 export const transformCharacterData = (characterData) => {
+  console.log(characterData)
   return {
     characterIndex: characterData.characterIndex.toNumber(),
     name: characterData.name,
@@ -20,16 +21,21 @@ export const transformCharacterData = (characterData) => {
     hp: characterData.hp.toNumber(),
     maxHp: characterData.maxHp.toNumber(),
     equippedWeapon: characterData.equippedWeapon.toNumber(),
+    missPercent: characterData.missPercent,
+    dodgePercent: characterData.dodgePercent
   };
 };
 
 export const transformBossData = (bossData) => {
   return {
+    owner: bossData.owner,
     name: bossData.name,
     imageURI: bossData.imageURI,
     hp: bossData.hp.toNumber(),
     maxHp: bossData.maxHp.toNumber(),
-    attackDamage: bossData.attackDamage.toNumber()
+    attackDamage: bossData.attackDamage.toNumber(),
+    missPercent: bossData.missPercent,
+    dodgePercent: bossData.dodgePercent
   }
 }
 

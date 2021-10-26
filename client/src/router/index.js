@@ -38,7 +38,6 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  console.log(to, from);
   if(to.name !== 'Home' && store.state.currentAddress === null) 
     next({name: "Home"});
   else if(to.name === 'Home' && store.state.currentAddress !== null)

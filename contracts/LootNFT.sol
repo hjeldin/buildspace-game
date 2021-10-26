@@ -68,7 +68,7 @@ contract LootNFT is ERC721URIStorage {
                         abi.encodePacked(block.timestamp, Strings.toString(newItemId))
                     )
                 )
-            )) % 70 + 50;
+            )) % 90 + 50;
         }
         if(itemType == ItemType.BOW) {
             image = 'https://bafkreiclfah454anm7fcslfpzlurxdnujsrc6grzk7uqhio7nebar4m3ca.ipfs.dweb.link';
@@ -130,7 +130,7 @@ contract LootNFT is ERC721URIStorage {
         cid = '';
         typeValue = 'Bow';
       }
-        return Base64.encode(
+        string memory json = Base64.encode(
             bytes(
                 string(
                     abi.encodePacked(
@@ -156,6 +156,11 @@ contract LootNFT is ERC721URIStorage {
                 )
             )
         );
+        string memory output = string(
+            abi.encodePacked("data:application/json;base64,", json)
+        );
+
+        return output;
     }
 
     function random(string memory input) internal pure returns (uint256) {

@@ -43,6 +43,10 @@ import router from "../router";
 export default {
   name: "SelectCharacter",
   async mounted() {
+    let body = document.getElementsByTagName("body");
+    for(let i = 0; i < body.length; i++) {
+      body[i].classList = '';
+    }
     this.setLoading(true);
     await this.fetchSelectedCharacter();
     await this.fetchDefaultCharacters();
@@ -76,7 +80,7 @@ export default {
   },
   watch: {
     '$store.state.selectedCharacter': function(n) {
-      if(n !== null) {
+      if(n !== null && n.hp != 0) {
         router.push({name: 'MintWeapon'});
       }
     }

@@ -10,10 +10,13 @@ const main = async () => {
       "https://bafybeid7uhd23pw2clj3zoi4lfhdpkqnyx46icw5do6liuf2retdwb2day.ipfs.dweb.link/"
     ],
     [1,1,1,1].map(m => Math.round(Math.random()*150 + 75)),
+    [1,1,1,1].map(m => Math.round(Math.random()*3 + 1)),
+    [1,1,1,1].map(m => Math.round(Math.random()*5 + 1)),
     "BigBoss",
     "https://bafkreidtndj7prgtbnupt3n4mhs3i44tv3jq3lucqzgfo3v5u4bvbph4x4.ipfs.dweb.link/",
-    5000,
-    20
+    200,
+    20,
+    [3, 5]
   );
   await gameContract.deployed();
 

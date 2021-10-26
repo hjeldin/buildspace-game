@@ -19,14 +19,19 @@ contract MyEpicGame is ERC721 {
         uint256 hp;
         uint256 maxHp;
         uint256 equippedWeapon; // Check out LootNFT contract
+        uint8 missPercent;
+        uint8 dodgePercent;
     }
 
     struct BigBoss {
+        address owner;
         string name;
         string imageURI;
         uint256 hp;
         uint256 maxHp;
         uint256 attackDamage;
+        uint8 missPercent;
+        uint8 dodgePercent;
     }
 
     BigBoss public bigBoss;
@@ -39,30 +44,48 @@ contract MyEpicGame is ERC721 {
 
     mapping(address => uint256) public nftHolders;
 
+    mapping(address => uint256) public attackCounter;
+
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-
-    event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
-    event AttackComplete(uint newBossHp, uint newPlayerHp);
+    event CharacterNFTMinted(
+        address sender,
+        uint256 tokenId,
+        uint256 characterIndex
+    );
+    event AttackComplete(uint256 newBossHp, uint256 newPlayerHp);
     event WeaponEquipped(uint256 equippedWeapon);
+    event CharacterHealed(uint256 tokenId);
+    event NewBigBoss();
+    event PlayerAttackMissed(address target);
+    event PlayerAttackDodged(address target);
+    event BossAttackMissed(address target);
+    event BossAttackDodged(address target);
 
     constructor(
         address lootContractAddress,
         string[] memory characterNames,
         string[] memory characterImageURIs,
         uint256[] memory characterHp,
+        uint8[] memory missPercents,
+        uint8[] memory dodgePercents,
         string memory bossName,
         string memory bossImageURI,
         uint256 bossHp,
-        uint256 bossAttackDamage
+        uint256 bossAttackDamage,
+        uint8[] memory bossMissDodge
+        // uint8 bossDodgePercent
     ) ERC721("HeroNFT", "HNT") {
         bigBoss = BigBoss({
+            owner: msg.sender,
             name: bossName,
             imageURI: bossImageURI,
             hp: bossHp,
             maxHp: bossHp,
-            attackDamage: bossAttackDamage
+            attackDamage: bossAttackDamage,
+            missPercent: bossMissDodge[0],
+            dodgePercent: bossMissDodge[1]
         });
 
         console.log(
@@ -81,7 +104,9 @@ contract MyEpicGame is ERC721 {
                     imageURI: characterImageURIs[i],
                     hp: characterHp[i],
                     maxHp: characterHp[i],
-                    equippedWeapon: 0 // no equipped weapon
+                    equippedWeapon: 0, // no equipped weapon
+                    missPercent: missPercents[i],
+                    dodgePercent: dodgePercents[i]
                 })
             );
 
@@ -114,7 +139,9 @@ contract MyEpicGame is ERC721 {
             imageURI: defaultCharacter.imageURI,
             hp: defaultCharacter.hp,
             maxHp: defaultCharacter.maxHp,
-            equippedWeapon: equippedWeapon
+            equippedWeapon: equippedWeapon,
+            missPercent: defaultCharacter.missPercent,
+            dodgePercent: defaultCharacter.dodgePercent
         });
 
         console.log("Minted character for %s: %d", msg.sender, newItemId);
@@ -123,12 +150,12 @@ contract MyEpicGame is ERC721 {
 
         _tokenIds.increment();
 
+        attackCounter[msg.sender] = 0;
+
         emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
     }
 
-    function mintCharacterWithoutWeapon(uint256 _characterIndex)
-        external
-    {
+    function mintCharacterWithoutWeapon(uint256 _characterIndex) external {
         uint256 newItemId = _tokenIds.current();
 
         _safeMint(msg.sender, newItemId);
@@ -142,7 +169,9 @@ contract MyEpicGame is ERC721 {
             imageURI: defaultCharacter.imageURI,
             hp: defaultCharacter.hp,
             maxHp: defaultCharacter.maxHp,
-            equippedWeapon: 0
+            equippedWeapon: 0,
+            missPercent: defaultCharacter.missPercent,
+            dodgePercent: defaultCharacter.dodgePercent
         });
 
         console.log("Minted character for %s: %d", msg.sender, newItemId);
@@ -162,15 +191,19 @@ contract MyEpicGame is ERC721 {
         emit WeaponEquipped(weaponTokenId);
     }
 
-    function getMyHP() public view returns (uint) {
+    function getMyHP() public view returns (uint256) {
         uint256 token = nftHolders[msg.sender];
         CharacterAttributes storage player = nftHolderAttributes[token];
         return player.hp;
     }
 
-    function checkIfUserHasNFT() public view returns (CharacterAttributes memory) {
+    function checkIfUserHasNFT()
+        public
+        view
+        returns (CharacterAttributes memory)
+    {
         uint256 token = nftHolders[msg.sender];
-        if(token > 0) {
+        if (token > 0) {
             return nftHolderAttributes[token];
         } else {
             CharacterAttributes memory empty;
@@ -178,7 +211,11 @@ contract MyEpicGame is ERC721 {
         }
     }
 
-    function getAllDefaultCharacters() public view returns (CharacterAttributes[] memory) {
+    function getAllDefaultCharacters()
+        public
+        view
+        returns (CharacterAttributes[] memory)
+    {
         return defaultCharacters;
     }
 
@@ -197,18 +234,18 @@ contract MyEpicGame is ERC721 {
         ];
 
         (
-            string memory itemName,
-            string memory itemDescr,
-            string memory itemImageUri,
-            LootNFT.ItemType itemType,
-            uint256 itemDmg,
-            uint256 itemLevel
+            ,,,,uint256 itemDmg,
         ) = lootContract.itemAttributes(charAttributes.equippedWeapon);
 
         string memory strHp = Strings.toString(charAttributes.hp);
         string memory strMaxHp = Strings.toString(charAttributes.maxHp);
         string memory strAttackDamage = Strings.toString(itemDmg);
-
+        string memory strMissPercent = Strings.toString(
+            charAttributes.missPercent
+        );
+        string memory strDodgePercent = Strings.toString(
+            charAttributes.dodgePercent
+        );
         string memory json = Base64.encode(
             bytes(
                 string(
@@ -225,7 +262,11 @@ contract MyEpicGame is ERC721 {
                         strMaxHp,
                         '}, { "trait_type": "Attack Damage", "value": ',
                         strAttackDamage,
-                        "} ]}"
+                        '}, { "trait_type": "Miss. %", "value": ',
+                        strMissPercent,
+                        '}, { "trait_type": "Dodge %", "value": ',
+                        strDodgePercent,
+                        '}]}'
                     )
                 )
             )
@@ -243,12 +284,8 @@ contract MyEpicGame is ERC721 {
         CharacterAttributes storage player = nftHolderAttributes[token];
 
         (
-            string memory itemName,
-            string memory itemDescr,
-            string memory itemImageUri,
-            LootNFT.ItemType itemType,
+            ,,,,
             uint256 itemDmg,
-            uint256 itemLevel
         ) = lootContract.itemAttributes(player.equippedWeapon);
 
         console.log(
@@ -269,19 +306,86 @@ contract MyEpicGame is ERC721 {
         // Make sure the boss has more than 0 HP.
         require(bigBoss.hp > 0, "Error: boss must have HP to attack boss.");
 
-        if (bigBoss.hp < itemDmg) {
-            bigBoss.hp = 0;
+        uint8 missRV = uint8(
+            random(string(abi.encodePacked(block.timestamp % block.number))) %
+                100
+        );
+        // uint8 dodgeRV = uint8(
+        //     random(string(abi.encodePacked(block.number % block.timestamp))) %
+        //         100
+        // );
+
+        if (missRV < player.missPercent) {
+            emit PlayerAttackMissed(msg.sender);
         } else {
-            bigBoss.hp = bigBoss.hp - itemDmg;
+            if (missRV < bigBoss.dodgePercent) {
+                emit PlayerAttackDodged(msg.sender);
+            } else {
+                if (bigBoss.hp < itemDmg) {
+                    bigBoss.hp = 0;
+                    becomeBoss();
+                    emit AttackComplete(bigBoss.hp, player.hp);
+                    emit NewBigBoss();
+                    return;
+                } else {
+                    bigBoss.hp = bigBoss.hp - itemDmg;
+                }
+            }
         }
 
         // Allow boss to attack player.
-        if (player.hp < bigBoss.attackDamage) {
-            player.hp = 0;
+        if (missRV < bigBoss.missPercent) {
+            emit BossAttackMissed(msg.sender);
         } else {
-            player.hp = player.hp - bigBoss.attackDamage;
+            if (missRV < player.dodgePercent) {
+                emit BossAttackDodged(msg.sender);
+            } else {
+                if (player.hp < bigBoss.attackDamage) {
+                    player.hp = 0;
+                } else {
+                    player.hp = player.hp - bigBoss.attackDamage;
+                }
+            }
         }
 
+        attackCounter[msg.sender] = attackCounter[msg.sender] + 1;
+
         emit AttackComplete(bigBoss.hp, player.hp);
+    }
+
+    function healCharacter() public {
+        require(attackCounter[msg.sender] > 2);
+        attackCounter[msg.sender] = 0;
+        uint256 token = nftHolders[msg.sender];
+        if (token > 0) {
+            nftHolderAttributes[token].hp = nftHolderAttributes[token].maxHp;
+        }
+        emit CharacterHealed(token);
+    }
+
+    function becomeBoss() public {
+        require(bigBoss.hp == 0);
+        console.log("Trying to become the big boss");
+        uint256 token = nftHolders[msg.sender];
+        if (token > 0) {
+            bigBoss.imageURI = nftHolderAttributes[token].imageURI;
+            (
+                ,,,,
+                uint256 itemDmg,
+            ) = lootContract.itemAttributes(
+                    nftHolderAttributes[token].equippedWeapon
+                );
+            bigBoss.attackDamage = itemDmg;
+            bigBoss.name = nftHolderAttributes[token].name;
+            bigBoss.hp = nftHolderAttributes[token].maxHp * 10;
+            bigBoss.maxHp = nftHolderAttributes[token].maxHp * 10;
+            bigBoss.owner = msg.sender;
+            bigBoss.missPercent = nftHolderAttributes[token].missPercent;
+            bigBoss.dodgePercent = nftHolderAttributes[token].dodgePercent;
+        }
+    }
+
+    function random(string memory input) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(input)));
     }
 }

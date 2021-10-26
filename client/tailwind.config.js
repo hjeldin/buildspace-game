@@ -1,10 +1,20 @@
 module.exports = {
   purge: [
-    './index.html', './src/**/*.{vue,js,ts,jsx,tsx}'
+    './index.html', './src/**/*.{vue,js,ts,jsx,tsx}',
+    './node_modules/vue-tailwind-modal/src/VueTailwindModal.vue',
   ],
   darkMode: 'media', // or 'media' or 'class'
   theme: {
     extend: {
+      colors: {
+				"smoke-900": "rgba(0, 0, 0, 0.9)",
+				"smoke-800": "rgba(0, 0, 0, 0.75)",
+				"smoke-600": "rgba(0, 0, 0, 0.6)",
+				smoke: "rgba(0, 0, 0, 0.5)",
+				"smoke-400": "rgba(0, 0, 0, 0.4)",
+				"smoke-200": "rgba(0, 0, 0, 0.25)",
+				"smoke-100": "rgba(0, 0, 0, 0.1)",
+			},
       animation: {
         tilt: 'tilt 10s infinite linear',
         scale: 'scale 1s linear',

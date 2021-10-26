@@ -2,7 +2,7 @@
   <div id="app" class="text-white">
     <div class="container mx-auto">
       <div class="text-center pt-12">
-        <h1 class="text-6xl">⚔️ Metaverse Slayer ⚔️</h1>
+        <h1 class="text-6xl">⚔️ Westgate Arena ⚔️</h1>
       </div>
       <router-view />
     </div>

@@ -4,18 +4,6 @@ const main = async () => {
   await lootContract.deployed();
 
   console.log(`Contract deployed @ ${lootContract.address}`);
-
-  let tx = await lootContract.mintLoot(0, "My favourite sword", "A brief description");
-
-  await tx.wait();
-
-  tx = await lootContract.mintLoot(1, "My favourite axe", "A brief description");
-
-  await tx.wait();
-
-  tx = await lootContract.mintLoot(2, "My favourite bow", "A brief description");
-
-  await tx.wait();
 };
 
 const runMain = async () => {

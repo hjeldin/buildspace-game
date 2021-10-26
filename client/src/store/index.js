@@ -27,7 +27,7 @@ const storeConfig = {
       index: 1,
       imageUri: 'https://bafkreibs6hpzzrtsqwj73ja6c5uc3ppewqwxwznze4auo3ypgibhbv6cii.ipfs.dweb.link/',
       minDmg: 50,
-      maxDmg: 50+70
+      maxDmg: 50+90
     }, {
       name: 'Bow',
       index: 2,
@@ -152,7 +152,6 @@ const storeConfig = {
       console.log('Checking for default character NFT on address:');
 
       const gameContract = await context.dispatch('fetchGameContract');
-
       const txn = await gameContract.getAllDefaultCharacters();
       const characters = txn.map((characterData) =>
         transformCharacterData(characterData)
@@ -163,6 +162,8 @@ const storeConfig = {
     async fetchWeapons(context) {
       const lootContract = await context.dispatch('fetchLootContract');
       const txn = await lootContract.getAvailableItems();
+      const txnToken = await lootContract.tokenURI(1);
+      console.log(txnToken);
       const weapons = txn.map((weaponsData) =>
         transformWeaponData(weaponsData)
       );
@@ -197,7 +198,6 @@ const storeConfig = {
         const gameContract = await context.dispatch('fetchGameContract');
         const mintTx = await gameContract.mintCharacterWithoutWeapon(characterIndex);
         await mintTx.wait();
-        console.log(`minting ${mintTx}`);
       } catch (err) {
         context.commit('SET_LOADING', false);
       }
@@ -205,27 +205,32 @@ const storeConfig = {
     async fetchBoss(context) {
       const gameContract = await context.dispatch('fetchGameContract');
       const bossTxn = await gameContract.getBigBoss();
-      console.log('Boss:', bossTxn);
       context.commit('SET_BOSS', transformBossData(bossTxn));
     },
     async attackBoss(context) {
       try{
-        console.log('Attacking boss...');
+        context.commit('SET_LOADING', true);
         const gameContract = await context.dispatch('fetchGameContract');
         const attackTxn = await gameContract.attackBoss();
         context.commit('SET_ATTACKING', 'playerAttacking');
         await new Promise((resolve)=> { setTimeout( resolve, 750 )});
         await attackTxn.wait();
-        console.log('attackTxn:', attackTxn);
         context.commit('SET_ATTACKING', 'playerHit');
         await new Promise((resolve)=> { setTimeout( resolve, 1500 )});
         context.commit('SET_ATTACKING', 'bossAttacking');
         await new Promise((resolve)=> { setTimeout( resolve, 750 )});
         context.commit('SET_ATTACKING', 'bossHit');
+        context.commit('SET_LOADING', false);
       } catch (error) {
         console.error(error);
         context.commit('SET_ATTACKING', '');
+        context.commit('SET_LOADING', false);
       }
+    },
+    async healCharacter(context) {
+      const gameContract = await context.dispatch('fetchGameContract');
+      const healTxn = await gameContract.healCharacter();
+      await healTxn.wait();
     }
   },
 };
